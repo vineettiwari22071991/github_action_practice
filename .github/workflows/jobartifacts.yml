@@ -1,43 +1,45 @@
 name: Job Artifacts
-on :
+
+on:
   push:
     branches:
       - main
   workflow_dispatch:
+
 jobs:
   test:
-     runs-on: ubuntu-latest
-     steps:
-       - name: Get code
-         uses: actions/checkout@v3
-       - name: Install dependencies
-         run: npm ci
-       - name: Lint code
-         run: npm run lint
-       - name: Test code
-         run: npm run test
-       - name: Upload Artifacts
-         uses: actions/upload-artifact@v3
-         with:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code
+        uses: actions/checkout@v3
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint code
+        run: npm run lint
+      - name: Test code
+        run: npm run test
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
           name: dist-files
           path: |
             dist-files
             package.json 
+
   build:
-      needs: test
-      runs-on: ubuntu-latest
-      steps: 
-        - name: Get code
-          uses: actions/checkout@v3
-        - name: Install dependinces
-          run: npm ci
-        - name: Build website
-          run: npm run build 
-  deploy: 
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code
+        uses: actions/checkout@v3
+      - name: Install dependencies
+        run: npm ci
+      - name: Build website
+        run: npm run build 
+
+  deploy:
     needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Deploy
         run: echo "Deploying..."
-
-         
