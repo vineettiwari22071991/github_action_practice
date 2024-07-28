@@ -1,0 +1,73 @@
+name: Job Artifacts
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code
+        uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint code
+        run: npm run lint
+      - name: Test code
+        run: npm run test
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-files
+          path: |
+            dist-files
+            package.json 
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    outputs: # this command lets the jobs has to produces the output file
+      script-file: ${{ steps.publish.outputs.script-file }} # this tells the path of the output file with the ID define in job step
+    steps:
+      - name: Get code
+        uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm ci
+      - name: Build website
+        run: npm run build
+      - name: Publish JS filename
+        id: publish # this is the ID which is given by developer to identify the job
+        run: find dist/assets/*.js -type f -execdir echo 'script-file={}' >> $GITHUB_OUTPUT ';' # this command finds the path of the file after the build is created and the produces the output file
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-files_1
+          path: |
+            dist-files
+            package.json 
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get build Artifacts
+        uses: actions/download-artifact@v4
+        with: 
+         name: dist-files_1
+      - name: Output contents
+        run: ls
+      - name: Output filename
+        run: echo "${{ needs.build.outputs.script-file }}"   
+      - name: Deploy
+        run: echo "Deploying..."
