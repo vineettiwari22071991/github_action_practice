@@ -1,4 +1,4 @@
-name: Job Artifacts
+name: Output file
 
 on:
   push:
