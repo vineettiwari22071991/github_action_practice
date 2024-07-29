@@ -16,7 +16,10 @@ jobs:
           curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                -H "Accept: application/vnd.github.v3+json" \
                "https://api.github.com/repos/${{ github.repository }}/collaborators" > collaborators.json
-          
+          # Print out the list of open and closed pull requests
+          echo "Repo Users List:"
+          cat collaborators.json  
+  
       - name: List all repository users
         id: list_users
         run: |
@@ -30,3 +33,9 @@ jobs:
           # Count the number of admin users
           admin_count=$(jq '[.[] | select(.permissions.admin == true)] | length' collaborators.json)
           echo "Number of admin users: $admin_count"
+
+      - name: Upload Closed Pull Requests JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: collaborators
+          path: collaborators.json       
