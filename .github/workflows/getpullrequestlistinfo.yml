@@ -37,3 +37,15 @@ jobs:
           jq -r '.[] | "\(.title) - \(.html_url)"' open_pull_requests.json
           echo "Closed Pull Requests:"
           jq -r '.[] | "\(.title) - \(.html_url)"' closed_pull_requests.json
+
+      - name: Upload Open Pull Requests JSON
+        uses: actions/upload-artifact@v4
+        with:
+            name: open-pull-requests
+            path: open_pull_requests.json
+
+      - name: Upload Closed Pull Requests JSON
+        uses: actions/upload-artifact@v4
+        with:
+            name: closed-pull-requests
+            path: closed_pull_requests.json    
