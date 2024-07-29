@@ -1,6 +1,7 @@
 name: Fetch Pull Requests
 
 on:
+  push:  
   workflow_dispatch:
 jobs:
   fetch-prs:
