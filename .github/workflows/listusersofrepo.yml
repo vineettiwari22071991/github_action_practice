@@ -1,0 +1,32 @@
+name: List Repo Users
+
+on:
+  push:    
+  workflow_dispatch:
+
+jobs:
+  list-users:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: List all repository users
+        id: list_users
+        run: |
+          # Fetch all users of the repository
+          echo "Fetching repository collaborators..."
+          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+               -H "Accept: application/vnd.github.v3+json" \
+               "https://api.github.com/repos/${{ github.repository }}/collaborators?permission=admin,maintain,write,read" > collaborators.json
+          
+          # Extract usernames
+          echo "Users in the repository:"
+          jq -r '.[].login' collaborators.json
+
+      - name: List admin users
+        id: list_admins
+        run: |
+          # Fetch admin users
+          echo "Fetching admin collaborators..."
+          jq -r '.[] | select(.permissions.admin == true) | .login' collaborators.json
