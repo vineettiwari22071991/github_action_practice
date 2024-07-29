@@ -1,6 +1,7 @@
 name: List Pull Requests
 
 on:
+  push:
   workflow_dispatch:
 
 jobs:
