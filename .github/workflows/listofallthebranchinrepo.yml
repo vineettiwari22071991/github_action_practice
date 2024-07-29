@@ -1,0 +1,62 @@
+name: Fetch Branch Details
+
+on:
+  push:    
+  workflow_dispatch:
+
+jobs:
+  fetch-details:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Git
+      run: |
+        git fetch --all
+
+    - name: Fetch branch details and create JSON
+      id: fetch-details
+      run: |
+        # Create an empty JSON file
+        echo "[]" > branches.json
+        
+        # Get list of branches
+        branches=$(git branch -r | grep -v '\->' | sed 's/origin\///')
+        
+        # Loop through each branch
+        for branch in $branches; do
+          # Checkout each branch
+          git checkout $branch > /dev/null 2>&1
+
+          # Get latest commit details
+          commit_id=$(git log -1 --format="%H")
+          commit_message=$(git log -1 --format="%s")
+          created_date=$(git log -1 --format="%ci")
+
+          # Create a JIRA ticket link (customize this based on your JIRA setup)
+          jira_ticket="https://your-jira-instance/browse/${branch}"
+
+          # Add branch details to JSON
+          jq -n \
+            --arg branch "$branch" \
+            --arg commit_id "$commit_id" \
+            --arg commit_message "$commit_message" \
+            --arg created_date "$created_date" \
+            --arg jira_ticket "$jira_ticket" \
+            '[{branch: $branch, commit_id: $commit_id, commit_message: $commit_message, created_date: $created_date, jira_ticket: $jira_ticket}]' > temp.json
+
+          # Merge new data with the existing JSON
+          jq -s 'add' branches.json temp.json > branches_tmp.json
+          mv branches_tmp.json branches.json
+        done
+
+        # Clean up
+        rm temp.json
+
+    - name: Upload JSON artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: branch-details
+        path: branches.json
