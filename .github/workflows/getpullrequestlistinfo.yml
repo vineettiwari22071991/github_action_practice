@@ -1,48 +1,38 @@
-name: Fetch Pull Requests
+name: List Pull Requests
 
 on:
-  push:  
   workflow_dispatch:
+
 jobs:
-  fetch-prs:
+  list-pull-requests:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - name: Checkout the repository
+        uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14'
-
-      - name: Install GitHub CLI
-        run: sudo apt-get install gh -y
-
-      - name: Authenticate GitHub CLI
+      - name: List Open and Closed Pull Requests
+        id: list_prs
         run: |
-          echo "${{ secrets.GH_PAT }}" | gh auth login --with-token
+          # Get a list of open pull requests from the GitHub API
+          curl -H "Accept: application/vnd.github.v3+json" \
+               -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+               "https://api.github.com/repos/${{ github.repository }}/pulls?state=open" > open_pull_requests.json
+          
+          # Get a list of closed pull requests from the GitHub API
+          curl -H "Accept: application/vnd.github.v3+json" \
+               -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+               "https://api.github.com/repos/${{ github.repository }}/pulls?state=closed" > closed_pull_requests.json
+          
+          # Print out the list of open and closed pull requests
+          echo "Open Pull Requests:"
+          cat open_pull_requests.json
+          echo "Closed Pull Requests:"
+          cat closed_pull_requests.json
 
-      - name: Fetch open pull requests
-        id: fetch-open-prs
-        run: |
-          gh pr list --repo <owner>/<repo> --state open --json number,title > open-prs.json
-
-      - name: Fetch closed pull requests
-        id: fetch-closed-prs
-        run: |
-          gh pr list --repo <owner>/<repo> --state closed --json number,title > closed-prs.json
-
-      - name: Output open pull requests
+      - name: Show Open and Closed PRs
         run: |
           echo "Open Pull Requests:"
-          cat open-prs.json
-
-      - name: Output closed pull requests
-        run: |
+          jq -r '.[] | "\(.title) - \(.html_url)"' open_pull_requests.json
           echo "Closed Pull Requests:"
-          cat closed-prs.json
-      - name: Output closed pull requests
-        run: |
-            echo "Closed Pull Requests:"
-            cat closed-prs.json
+          jq -r '.[] | "\(.title) - \(.html_url)"' closed_pull_requests.json
