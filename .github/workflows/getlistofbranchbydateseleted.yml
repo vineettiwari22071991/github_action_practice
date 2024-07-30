@@ -1,6 +1,7 @@
 name: Fetch Branch Details By date Input
 
 on:
+  push:
   workflow_dispatch:
     inputs:
       start_date:
