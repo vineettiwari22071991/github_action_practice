@@ -1,0 +1,36 @@
+name: List Git Users
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  list_users:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Generate user list in JSON format
+        run: |
+          #!/bin/bash
+          # Check if the script is run in a git repository
+          if [ ! -d ".git" ]; then
+            echo "This script must be run inside a Git repository."
+            exit 1
+          fi
+
+          # Extract all unique authors from the git log and save to a JSON file
+          echo "[" > users_list.json
+          git log --format='%aN <%aE>' | sort -u | while read -r line; do
+            echo "  \"$line\"," >> users_list.json
+          done
+          sed -i '$ s/,$//' users_list.json  # Remove the trailing comma
+          echo "]" >> users_list.json
+
+      - name: Upload user list JSON artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: users-list-json
+          path: users_list.json
