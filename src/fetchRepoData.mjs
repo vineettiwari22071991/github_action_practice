@@ -73,7 +73,7 @@ async function fetchRepoData() {
      </style>
    </head>
    <body>
-     <h1>Repository Data Report</h1>
+     <h1>Repository Data Report for ${repo}</h1>
      <table>
        <tr>
          <th>Metric</th>
