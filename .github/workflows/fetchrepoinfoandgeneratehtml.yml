@@ -21,7 +21,7 @@ jobs:
         run: npm install
 
       - name: Run Fetch Script
-        run: node src/fetchRepoData.cjs
+        run: node src/fetchRepoData.mjs
 
       - name: Upload HTML Report
         uses: actions/upload-artifact@v2
