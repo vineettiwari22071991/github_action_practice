@@ -28,13 +28,10 @@ async function fetchRepoData() {
     const pullRequests = await fetchData(`https://api.github.com/repos/${owner}/${repo}/pulls?state=all`);
     const openPRs = pullRequests.filter(pr => pr.state === 'open').length;
     const closedPRs = pullRequests.filter(pr => pr.state === 'closed').length;
-
-    // Fetch contributors
-    const contributors = await fetchData(`https://api.github.com/repos/${owner}/${repo}/collaborators`);
-    const allUsersCount = contributors.length;
-
+    
     // Fetch collaborators
     const collaborators = await fetchData(`https://api.github.com/repos/${owner}/${repo}/collaborators`);
+    const allUsersCount = collaborators.length;
     const adminUsersCount = collaborators.filter(user => user.permissions.admin).length;
 
    // Generate HTML
