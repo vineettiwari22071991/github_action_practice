@@ -21,6 +21,8 @@ jobs:
         run: npm install
 
       - name: Run Fetch Script
+        env:
+            TOKEN_GITHUB: ${{ secrets.GITHUB_TOKEN }}
         run: node src/fetchRepoData.mjs
 
       - name: Upload HTML Report
