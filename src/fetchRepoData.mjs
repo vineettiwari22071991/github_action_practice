@@ -74,6 +74,7 @@ async function fetchRepoData() {
    </head>
    <body>
      <h1>Repository Data Report for ${repo}</h1>
+     <a href="https://github.com/vineettiwari22071991/github_action_practice">Link to Repository</a>
      <table>
        <tr>
          <th>Metric</th>
