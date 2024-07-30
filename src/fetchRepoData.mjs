@@ -30,7 +30,7 @@ async function fetchRepoData() {
     const closedPRs = pullRequests.filter(pr => pr.state === 'closed').length;
 
     // Fetch contributors
-    const contributors = await fetchData(`https://api.github.com/repos/${owner}/${repo}/contributors`);
+    const contributors = await fetchData(`https://api.github.com/repos/${owner}/${repo}/collaborators`);
     const allUsersCount = contributors.length;
 
     // Fetch collaborators
