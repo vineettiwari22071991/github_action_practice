@@ -37,39 +37,68 @@ async function fetchRepoData() {
     const collaborators = await fetchData(`https://api.github.com/repos/${owner}/${repo}/collaborators`);
     const adminUsersCount = collaborators.filter(user => user.permissions.admin).length;
 
-    // Generate HTML
-    const htmlContent = `
-      <html>
-      <head>
-        <title>Repository Data Report</title>
-      </head>
-      <body>
-        <h1>Repository Data Report</h1>
-        <table border="1">
-          <tr>
-            <th>Metric</th>
-            <th>Count</th>
-          </tr>
-          <tr>
-            <td>Open Pull Requests</td>
-            <td>${openPRs}</td>
-          </tr>
-          <tr>
-            <td>Closed Pull Requests</td>
-            <td>${closedPRs}</td>
-          </tr>
-          <tr>
-            <td>Total Users</td>
-            <td>${allUsersCount}</td>
-          </tr>
-          <tr>
-            <td>Admin Users</td>
-            <td>${adminUsersCount}</td>
-          </tr>
-        </table>
-      </body>
-      </html>
-    `;
+   // Generate HTML
+   const htmlContent = `
+   <!DOCTYPE html>
+   <html>
+   <head>
+     <title>Repository Data Report</title>
+     <style>
+       body {
+         font-family: Arial, sans-serif;
+         margin: 0;
+         padding: 20px;
+         background-color: #f4f4f4;
+       }
+       h1 {
+         color: #333;
+       }
+       table {
+         width: 100%;
+         border-collapse: collapse;
+         margin: 20px 0;
+         background-color: #fff;
+       }
+       th, td {
+         padding: 12px;
+         border: 1px solid #ddd;
+         text-align: left;
+       }
+       th {
+         background-color: #f2f2f2;
+       }
+       tr:nth-child(even) {
+         background-color: #f9f9f9;
+       }
+     </style>
+   </head>
+   <body>
+     <h1>Repository Data Report</h1>
+     <table>
+       <tr>
+         <th>Metric</th>
+         <th>Count</th>
+       </tr>
+       <tr>
+         <td>Open Pull Requests</td>
+         <td>${openPRs}</td>
+       </tr>
+       <tr>
+         <td>Closed Pull Requests</td>
+         <td>${closedPRs}</td>
+       </tr>
+       <tr>
+         <td>Total Users</td>
+         <td>${allUsersCount}</td>
+       </tr>
+       <tr>
+         <td>Admin Users</td>
+         <td>${adminUsersCount}</td>
+       </tr>
+     </table>
+   </body>
+   </html>
+ `;
 
     fs.writeFileSync('report.html', htmlContent);
     console.log('Report generated successfully.');
