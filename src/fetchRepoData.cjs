@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { Octokit } = require("@octokit/rest");
+import { Octokit, App } from "@octokit/core"
 
 const token = process.env.TOKEN_GITHUB;
 if (!token) {
