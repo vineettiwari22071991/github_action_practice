@@ -1,7 +1,7 @@
 const fs = require('fs');
 const { Octokit } = require("@octokit/rest");
 
-const token = process.env.GITHUB_TOKEN;
+const token = process.env.TOKEN_GITHUB;
 if (!token) {
   throw new Error('GITHUB_TOKEN is not set');
 }
