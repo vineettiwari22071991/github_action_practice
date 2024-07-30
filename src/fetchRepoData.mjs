@@ -78,7 +78,7 @@ async function fetchRepoData() {
     @param {string} fileName - The name of the file to write to
     @param {string} content - The content to write to the file 
     */
-   fs.writeFileSync('repo-data-report.html', genrateHTMLReport(openPRs, closedPRs , allUsersCount , adminUsersCount));
+   fs.writeFileSync('repo-data-report.html', await genrateHTMLReport(openPRs, closedPRs , allUsersCount , adminUsersCount));
    console.log('Report generated successfully.');
  } catch (error) {
    console.error('Error fetching data:', error);
@@ -94,7 +94,7 @@ async function fetchRepoData() {
  @param {number} adminUsersCount - The number of admin collaborators
  @returns {string} - The HTML content for the report
 */
-function genrateHTMLReport(openPRs, closedPRs, allUsersCount, adminUsersCount) {
+async function genrateHTMLReport(openPRs, closedPRs, allUsersCount, adminUsersCount) {
   return htmlContent = `
   <!DOCTYPE html>
   <html>
