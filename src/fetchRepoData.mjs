@@ -95,7 +95,7 @@ async function fetchRepoData() {
  @returns {string} - The HTML content for the report
 */
 async function genrateHTMLReport(openPRs, closedPRs, allUsersCount, adminUsersCount) {
-  return htmlContent = `
+  return `
   <!DOCTYPE html>
   <html>
   <head>
