@@ -1,43 +1,40 @@
 const fs = require('fs');
-import { Octokit, App } from "@octokit/core"
+const fetch = require('node-fetch');
 
 const token = process.env.TOKEN_GITHUB;
 if (!token) {
-  throw new Error('GITHUB_TOKEN is not set');
+  throw new Error('TOKEN_GITHUB is not set');
 }
 
-const octokit = new Octokit({ auth: token });
+const owner = 'vineettiwari22071991';
+const repo = 'github_action_practice';
+
+async function fetchData(url) {
+  const response = await fetch(url, {
+    headers: {
+      'Authorization': `token ${token}`,
+      'Accept': 'application/vnd.github.v3+json'
+    }
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
+  }
+  return response.json();
+}
 
 async function fetchRepoData() {
-  const owner = 'vineettiwari22071991';
-  const repo = 'github_action_practice';
-
   try {
     // Fetch pull requests
-    const { data: pullRequests } = await octokit.pulls.list({
-      owner,
-      repo,
-      state: 'all',
-    });
-
+    const pullRequests = await fetchData(`https://api.github.com/repos/${owner}/${repo}/pulls?state=all`);
     const openPRs = pullRequests.filter(pr => pr.state === 'open').length;
     const closedPRs = pullRequests.filter(pr => pr.state === 'closed').length;
 
     // Fetch contributors
-    const { data: contributors } = await octokit.repos.listContributors({
-      owner,
-      repo,
-    });
-
+    const contributors = await fetchData(`https://api.github.com/repos/${owner}/${repo}/contributors`);
     const allUsersCount = contributors.length;
 
-    // Fetch collaborators with permission check
-    const { data: collaborators } = await octokit.repos.listCollaborators({
-      owner,
-      repo,
-      affiliation: 'all',
-    });
-
+    // Fetch collaborators
+    const collaborators = await fetchData(`https://api.github.com/repos/${owner}/${repo}/collaborators`);
     const adminUsersCount = collaborators.filter(user => user.permissions.admin).length;
 
     // Generate HTML
