@@ -37,7 +37,6 @@ Fetch data from the GitHub API
 @param {string} url - The URL to fetch data from
 @returns {Promise<Object>} - The JSON response from the API
 */
-// Function to fetch data from the GitHub API
 async function fetchData(url) {
   const response = await fetch(url, {
     headers: {
@@ -55,13 +54,10 @@ async function fetchData(url) {
 Generate HTML report
 @returns {string} - The HTML report
 */
-// Function to generate the HTML report
 async function fetchRepoData() {
 
   try {
-    /* Fetch pull requests
-       Fetch open pull requests
-    */ 
+    // Fetch all pull requests
     const pullRequests = await fetchData(`https://api.github.com/repos/${owner}/${repo}/pulls?state=all`);
     const openPRs = pullRequests.filter(pr => pr.state === 'open').length;
     const closedPRs = pullRequests.filter(pr => pr.state === 'closed').length;
