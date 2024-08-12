@@ -19,13 +19,13 @@ jobs:
 
           # Extract PR description
           PR_DESCRIPTION=$(jq -r .pull_request.body "$GITHUB_EVENT_PATH")
-          
+
           # Debug: Print the PR description
           echo "PR_DESCRIPTION: '${PR_DESCRIPTION}'"
 
-          # Check if PR description is empty
-          if [ -z "$PR_DESCRIPTION" ]; then
-            echo "PR_DESCRIPTION is empty"
+          # Check if PR description is empty or 'null'
+          if [ -z "$PR_DESCRIPTION" ] || [ "$PR_DESCRIPTION" == "null" ]; then
+            echo "PR_DESCRIPTION is empty or 'null'"
             exit 1
           else
             echo "PR_DESCRIPTION is present"
