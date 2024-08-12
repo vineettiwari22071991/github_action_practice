@@ -2,50 +2,33 @@ name: Check PR Description
 
 on:
   pull_request:
-    types: [opened, edited, reopened]
+    types: [opened, edited]
     branches:
       - main
 
 jobs:
-  check-pr-description:
+  check-description:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Debug Event Payload
-        run: |
-          cat "$GITHUB_EVENT_PATH"
-
       - name: Check PR Description
-        id: check-description
-        run: |
-          # Extract PR description from the event payload
-          PR_DESCRIPTION=$(jq -r .pull_request.body "$GITHUB_EVENT_PATH")
-          
-          # Debug: Print the PR description
-          echo "PR_DESCRIPTION: '${PR_DESCRIPTION}'"
-          
-          # Check if PR description is empty or 'null'
-          if [ "$PR_DESCRIPTION" = "null" ] || [ -z "$PR_DESCRIPTION" ]; then
-            echo "PR_DESCRIPTION is empty or 'null'"
-            exit 1
-          else
-            echo "PR_DESCRIPTION is present"
-          fi
-
-      - name: Send message if PR description is missing
-        if: failure()
         uses: actions/github-script@v6
         with:
           script: |
-            const message = 'Please fill in an adequate commit message; please note that PR commit messages might get published in release notes as well.';
-            await github.rest.issues.createComment({
-              ...context.repo,
-              issue_number: context.issue.number,
-              body: message
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
             });
 
-      - name: Fail the PR if description is missing
-        if: failure()
-        run: |
-          echo "PR description is missing. Failing the PR."
-          exit 1
+            if (!pr.body) {
+              const message = 'Please fill in an adequate commit message; please note that PR commit messages might get published in release notes as well.';
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: message
+              });
+
+              // Fail the job
+              core.setFailed('PR description is missing.');
+            }
