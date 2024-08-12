@@ -1,0 +1,42 @@
+name: Check PR Description
+
+on:
+  pull_request:
+    types: [opened, edited]
+    branches:
+      - develop
+
+jobs:
+  check-pr-description:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check PR Description
+        id: check-description
+        run: |
+          PR_DESCRIPTION=$(jq -r .pull_request.body "$GITHUB_EVENT_PATH")
+          if [ -z "$PR_DESCRIPTION" ]; then
+            echo "PR_DESCRIPTION is empty"
+            exit 1
+          else
+            echo "PR_DESCRIPTION is present"
+          fi
+
+      - name: Send message if PR description is missing
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { context } = require('@actions/github');
+            const message = 'Please fill in an adequate commit message; please note that PR commit messages might get published in release notes as well.';
+            await github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: context.issue.number,
+              body: message
+            });
+
+      - name: Fail the PR if description is missing
+        if: failure()
+        run: |
+          echo "PR description is missing. Failing the PR."
+          exit 1
