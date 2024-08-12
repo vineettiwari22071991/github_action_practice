@@ -36,7 +36,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const { context } = require('@actions/github');
+            const { github, context } = require('@actions/github'); // Import context as well
             const message = 'Please fill in an adequate commit message; please note that PR commit messages might get published in release notes as well.';
             await github.rest.issues.createComment({
               ...context.repo,
