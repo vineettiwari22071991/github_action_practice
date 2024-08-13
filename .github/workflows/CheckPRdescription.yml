@@ -1,34 +1,32 @@
-name: Check PR Description
+name: PR Description Check
 
 on:
   pull_request:
     types: [opened, edited, reopened]
-    branches:
-      - main
+    branches: [develop]
 
 jobs:
   check-description:
     runs-on: ubuntu-latest
+
     steps:
       - name: Check PR Description
         uses: actions/github-script@v6
         with:
           script: |
-            const { data: pr } = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number
-            });
-
-            if (!pr.body) {
-              const message = 'Please fill in an adequate commit message; please note that PR commit messages might get published in release notes as well.';
+            const pr = github.context.payload.pull_request;
+            if (!pr.body || pr.body.trim().length === 0) {
+              const comment = 'Please provide a description.';
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body: message
+                issue_number: pr.number,
+                body: comment
               });
-
-              // Fail the job
-              core.setFailed('PR description is missing.');
+              await github.rest.pulls.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                state: 'closed'
+              });
             }
