@@ -1,31 +1,46 @@
-name: PR Description Check
+name: PR Description Validation and Closure
 
 on:
   pull_request:
-    types: [opened, edited, reopened]
-    branches: [main]
+    types: [opened, edited, reopened]  # Trigger workflow on PR events: opened, edited, and reopened
+    branches: [main]  # Only run on PRs targeting the 'main' branch
 
 jobs:
   check-description:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Use the latest Ubuntu environment for the job
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4  # Check out the repository code to the runner
 
       - name: Install GitHub CLI
-        run: sudo apt-get update && sudo apt-get install -y gh
+        run: sudo apt-get update && sudo apt-get install -y gh  # Install GitHub CLI on the runner
 
       - name: Authenticate GitHub CLI
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token  # Authenticate GitHub CLI using a token from secrets
 
       - name: Check PR Description
         run: |
-          pr_number=${{ github.event.pull_request.number }}
-          pr_body=$(gh pr view $pr_number --json body -q '.body')
-          message="${{ secrets.PR_DESCRIPTION_MESSAGE }}"
+          set -e  # Exit immediately if a command exits with a non-zero status
+          pr_number=${{ github.event.pull_request.number }}  # Get the PR number from the event payload
+          echo "Fetching PR number: $pr_number"
 
-          if [ -z "$pr_body" ] || [ "$pr_body" == "null" ] || [ -z "${pr_body// }" ]; then
-            gh pr comment $pr_number --body "$message"
-            gh pr close $pr_number
+          # Fetch the PR description (body) using GitHub CLI
+          pr_body=$(gh pr view $pr_number --json body -q '.body')
+          echo "PR Body: $pr_body"
+
+          # Trim whitespace from the PR body content
+          pr_body_trimmed=$(echo "$pr_body" | xargs)
+
+          # Check if the PR body is empty or null
+          if [ -z "$pr_body_trimmed" ]; then
+            echo "PR body is empty or null. Commenting and closing PR."
+
+            # Comment on the PR if the body is empty
+            gh pr comment $pr_number --body "${{ secrets.PR_DESCRIPTION_MESSAGE }}" || { echo "Failed to comment on PR"; exit 1; }
+
+            # Close the PR after commenting
+            gh pr close $pr_number || { echo "Failed to close PR"; exit 1; }
+          else
+            echo "PR body is sufficient."  # Log message if PR body is not empty
           fi
