@@ -23,8 +23,9 @@ jobs:
         run: |
           pr_number=${{ github.event.pull_request.number }}
           pr_body=$(gh pr view $pr_number --json body -q '.body')
+          message="${{ secrets.PR_DESCRIPTION_MESSAGE }}"
 
           if [ -z "$pr_body" ] || [ "$pr_body" == "null" ] || [ -z "${pr_body// }" ]; then
-            gh pr comment $pr_number --body "Please fill in an adequate commit message; please note that PR commit messages might get published in release notes as well."
+            gh pr comment $pr_number --body "$message"
             gh pr close $pr_number
           fi
