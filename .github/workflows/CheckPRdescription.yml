@@ -5,7 +5,7 @@ on:
   pull_request:
     types: [opened, edited, reopened]
     branches: 
-      - develop  # Update this to 'develop' after testing
+      - main  # Update this to 'develop' after testing
 
 jobs:
   check-description:
