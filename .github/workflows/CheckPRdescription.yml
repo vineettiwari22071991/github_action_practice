@@ -9,17 +9,16 @@ on:
 
 jobs:
   check-description:
-    runs-on: auto-u22-base
-    env:
-      GH_HOST: git.hub.vwgroup.com
-      GH_ENTERPRISE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
+        
+      - name: Install GitHub CLI
+        run: sudo apt-get update && sudo apt-get install -y gh  # Install GitHub CLI on the runner
+        
       - name: Authenticate GitHub CLI
-        run: echo ${{ env.GH_ENTERPRISE_TOKEN }} | gh auth login --with-token
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token  # Authenticate GitHub CLI using a token from secrets
 
       - name: Check PR Description
         run: |
