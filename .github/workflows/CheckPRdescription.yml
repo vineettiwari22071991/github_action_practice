@@ -37,7 +37,7 @@ jobs:
             echo "PR body is empty or null. Commenting and closing PR."
 
             # Comment on the PR if the body is empty
-            gh pr comment $pr_number --body "${{ secrets.PR_DESCRIPTION_MESSAGE }}" || { echo "Failed to comment on PR"; exit 1; }
+            gh pr comment $pr_number --body "${{ vars.PR_DESCRIPTION_MESSAGE }}" || { echo "Failed to comment on PR"; exit 1; }
 
             # Close the PR after commenting
             gh pr close $pr_number || { echo "Failed to close PR"; exit 1; }
