@@ -40,7 +40,7 @@ jobs:
 
             # Use the repository variable here
             gh pr comment $pr_number --body "${{ vars.PR_DESCRIPTION_MESSAGE }}" || { echo "Failed to comment on PR"; exit 1; }
-            gh pr close $pr_number || { echo "Failed to close PR"; exit 1; }
+            # gh pr close $pr_number || { echo "Failed to close PR"; exit 1; }
           else
             echo "PR body is sufficient."
           fi
