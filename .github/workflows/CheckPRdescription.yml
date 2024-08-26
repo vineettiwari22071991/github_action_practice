@@ -3,7 +3,7 @@ name: PR Description Validation and Closure
 on:
   workflow_dispatch:
   pull_request:
-    types: [opened, edited, reopened]
+    types: [opened, edited, reopened, synchronize]
     branches: 
       - main  # Update this to 'develop' after testing
 
@@ -20,27 +20,24 @@ jobs:
       - name: Authenticate GitHub CLI
         run: echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token  # Authenticate GitHub CLI using a token from secrets
 
-      - name: Check PR Description
+      - name: Fetch Open Pull Requests
         run: |
           set -e
-          pr_number=${{ github.event.pull_request.number }}
-          echo "Fetching PR number: $pr_number"
+          open_prs=$(gh pr list --state open --json number -q '.[].number')
+          echo "Open PRs: $open_prs"
 
-          # Debug output for PR number and variable
-          echo "PR number: $pr_number"
-          echo "PR Description Message: ${{ vars.PR_DESCRIPTION_MESSAGE }}"
+          for pr_number in $open_prs; do
+            echo "Processing PR #$pr_number"
+            pr_body=$(gh pr view $pr_number --json body -q '.body')
+            echo "PR Body: $pr_body"
 
-          pr_body=$(gh pr view $pr_number --json body -q '.body')
-          echo "PR Body: $pr_body"
+            pr_body_trimmed=$(echo "$pr_body" | xargs)
 
-          pr_body_trimmed=$(echo "$pr_body" | xargs)
-
-          if [ -z "$pr_body_trimmed" ]; then
-            echo "PR body is empty or null. Commenting and closing PR."
-
-            # Use the repository variable here
-            gh pr comment $pr_number --body "${{ vars.PR_DESCRIPTION_MESSAGE }}" || { echo "Failed to comment on PR"; exit 1; }
-            #//gh pr close $pr_number || { echo "Failed to close PR"; exit 1; }
-          else
-            echo "PR body is sufficient."
-          fi
+            if [ -z "$pr_body_trimmed" ]; then
+              echo "PR #$pr_number has an empty or null body. Commenting and closing PR."
+              gh pr comment $pr_number --body "${{ vars.PR_DESCRIPTION_MESSAGE }}" || { echo "Failed to comment on PR #$pr_number"; exit 1; }
+              gh pr close $pr_number || { echo "Failed to close PR #$pr_number"; exit 1; }
+            else
+              echo "PR #$pr_number has a sufficient body."
+            fi
+          done
