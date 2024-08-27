@@ -16,21 +16,38 @@ jobs:
 
       - name: Check PR Description
         run: |
+          # Store the pull request number in a variable
           pr_number=${{ github.event.pull_request.number }}
+          
+          # Store the pull request state in a variable (e.g., open, closed)
+          pr_state=${{ github.event.pull_request.state }}
+          
+          # Store the pull request draft status in a variable (true if the PR is a draft)
           pr_draft=${{ github.event.pull_request.draft }}
-          pr_body="${{ github.event.pull_request.body }}"
       
+          # If the PR is a draft, skip the description check and exit with status 0 (success)
           if [ "$pr_draft" = "true" ]; then
             echo "PR is a draft. Skipping description check."
             exit 0
           fi
       
+          # Fetch the PR body (description) using the GitHub context
+          pr_body="${{ github.event.pull_request.body }}"
+          
+          # Trim any leading or trailing whitespace from the PR body
           pr_body_trimmed=$(echo "$pr_body" | xargs)
       
+          # Check if the trimmed PR body is empty or null
           if [ -z "$pr_body_trimmed" ]; then
-            echo "PR body is empty or null. Exiting with failure status."
-            exit 1
+            echo "PR body is empty or null. Commenting and closing PR."
+            
+            # Comment on the PR indicating why it is being closed
+            echo "::set-output name=pr_comment::We are closing your PR as you have not provided the description. Please provide a clear and detailed pull request description to help reviewers understand the changes being proposed."
+            
+            # Close the PR since the description is not provided
+            echo "::set-output name=pr_close::true"
           else
+            # If the PR body is not empty, indicate that it is sufficient
             echo "PR body is sufficient."
           fi
       
