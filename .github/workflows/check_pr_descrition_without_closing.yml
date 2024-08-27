@@ -1,0 +1,36 @@
+name: PR Description Validation not closing
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+    branches: 
+      - main  # Update this to 'develop' after testing
+
+jobs:
+  check-description:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check PR Description
+        run: |
+          pr_number=${{ github.event.pull_request.number }}
+          pr_draft=${{ github.event.pull_request.draft }}
+          pr_body="${{ github.event.pull_request.body }}"
+      
+          if [ "$pr_draft" = "true" ]; then
+            echo "PR is a draft. Skipping description check."
+            exit 0
+          fi
+      
+          pr_body_trimmed=$(echo "$pr_body" | xargs)
+      
+          if [ -z "$pr_body_trimmed" ]; then
+            echo "PR body is empty or null. Exiting with failure status."
+            exit 1
+          else
+            echo "PR body is sufficient."
+          fi
+      
