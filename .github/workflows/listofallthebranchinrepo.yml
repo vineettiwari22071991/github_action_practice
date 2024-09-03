@@ -1,0 +1,52 @@
+name: Fetch Branch Details
+
+on:
+  push:  
+  workflow_dispatch:
+
+jobs:
+  fetch-details:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Git
+      run: |
+        git fetch --all
+
+    - name: Fetch branch details and create HTML
+      id: fetch-details
+      run: |
+        # Start HTML file with table header
+        echo "<html><body><h1>Branch Details</h1><table border='1'><tr><th>Branch Name</th><th>Commit ID</th><th>Commit Message</th><th>Created Date</th><th>JIRA Ticket</th></tr>" > branches.html
+        
+        # Get list of branches
+        branches=$(git branch -r | grep -v '\->' | sed 's/origin\///')
+        
+        # Loop through each branch
+        for branch in $branches; do
+          # Checkout each branch
+          git checkout $branch > /dev/null 2>&1
+
+          # Get latest commit details
+          commit_id=$(git log -1 --format="%H")
+          commit_message=$(git log -1 --format="%s")
+          created_date=$(git log -1 --format="%ci")
+
+          # Create a JIRA ticket link (customize this based on your JIRA setup)
+          jira_ticket="https://your-jira-instance/browse/${branch}"
+
+          # Append branch details to HTML file
+          echo "<tr><td>$branch</td><td>$commit_id</td><td>$commit_message</td><td>$created_date</td><td><a href='$jira_ticket'>$jira_ticket</a></td></tr>" >> branches.html
+        done
+
+        # Close HTML tags
+        echo "</table></body></html>" >> branches.html
+
+    - name: Upload HTML artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: branch-details
+        path: branches.html

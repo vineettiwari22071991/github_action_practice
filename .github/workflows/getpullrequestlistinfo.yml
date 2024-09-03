@@ -1,0 +1,51 @@
+name: List Pull Requests
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  list-pull-requests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+
+      - name: List Open and Closed Pull Requests
+        id: list_prs
+        run: |
+          # Get a list of open pull requests from the GitHub API
+          curl -H "Accept: application/vnd.github.v3+json" \
+               -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+               "https://api.github.com/repos/${{ github.repository }}/pulls?state=open" > open_pull_requests.json
+          
+          # Get a list of closed pull requests from the GitHub API
+          curl -H "Accept: application/vnd.github.v3+json" \
+               -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+               "https://api.github.com/repos/${{ github.repository }}/pulls?state=closed" > closed_pull_requests.json
+          
+          # Print out the list of open and closed pull requests
+          echo "Open Pull Requests:"
+          cat open_pull_requests.json
+          echo "Closed Pull Requests:"
+          cat closed_pull_requests.json
+
+      - name: Show Open and Closed PRs
+        run: |
+          echo "Open Pull Requests:"
+          jq -r '.[] | "\(.title) - \(.html_url)"' open_pull_requests.json
+          echo "Closed Pull Requests:"
+          jq -r '.[] | "\(.title) - \(.html_url)"' closed_pull_requests.json
+
+      - name: Upload Open Pull Requests JSON
+        uses: actions/upload-artifact@v4
+        with:
+            name: open-pull-requests
+            path: open_pull_requests.json
+
+      - name: Upload Closed Pull Requests JSON
+        uses: actions/upload-artifact@v4
+        with:
+            name: closed-pull-requests
+            path: closed_pull_requests.json    
