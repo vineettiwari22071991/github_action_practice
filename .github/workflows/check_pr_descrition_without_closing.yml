@@ -14,28 +14,26 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Check PR Description
+      - name: Validate PR Description
         run: |
-          # Extract PR number, state, and draft status
-          pr_number=${{ github.event.pull_request.number }}
-          pr_state=${{ github.event.pull_request.state }}
-          pr_draft=${{ github.event.pull_request.draft }}
-
           # Skip description check if PR is a draft
-          if [ "$pr_draft" = "true" ]; then
+          if [ "$PR_DRAFT" = "true" ]; then
             echo "PR is a draft. Skipping description check."
             exit 0
           fi
-
-          # Get the PR description and trim leading/trailing spaces
-          pr_body="${{ github.event.pull_request.body }}"
-          pr_body_trimmed=$(echo "$pr_body" | xargs)
-
+      
+          # Trim leading/trailing spaces from PR body
+          PR_BODY_TRIMMED=$(echo "$PR_BODY" | xargs)
+      
           # Check if the PR description is empty or null
-          if [ -z "$pr_body_trimmed" ]; then
-            echo "PR body is empty or null. Please provide a clear and detailed pull request description to help reviewers understand the changes being proposed."
+          if [ -z "$PR_BODY_TRIMMED" ]; then
+            echo "PR description is empty. Please provide a clear and detailed description."
             exit 1
-          else
-            echo "PR body is sufficient."
           fi
+      
+          echo "PR description is sufficient."
+          env:
+            PR_DRAFT: ${{ github.event.pull_request.draft }}
+            PR_BODY: ${{ github.event.pull_request.body }}
+
       
