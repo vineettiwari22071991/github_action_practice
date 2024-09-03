@@ -22,15 +22,11 @@ jobs:
             exit 0
           fi
       
-          # Directly access PR_BODY and handle potential edge cases
-          PR_BODY_TRIMMED=$(echo "$PR_BODY" | tr -d '\n' | xargs)
-      
-          # Debugging: Print the raw and trimmed PR body
-          echo "Raw PR Body: '$PR_BODY'"
-          echo "Trimmed PR Body: '$PR_BODY_TRIMMED'"
+          # Handle PR_BODY by removing newlines and trimming whitespace
+          pr_body_trimmed=$(echo "$PR_BODY" | tr -d '\n' | xargs)
       
           # Check if the PR description is empty or null
-          if [ -z "$PR_BODY_TRIMMED" ]; then
+          if [ -z "$pr_body_trimmed" ]; then
             echo "PR description is empty. Please provide a clear and detailed description."
             exit 1
           fi
@@ -39,6 +35,7 @@ jobs:
         env:
           PR_DRAFT: ${{ github.event.pull_request.draft }}
           PR_BODY: ${{ github.event.pull_request.body }}
+      
 
 
 
