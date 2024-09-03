@@ -22,13 +22,11 @@ jobs:
             exit 0
           fi
       
-          # Debugging: Print the raw PR body
+          # Directly access PR_BODY and handle potential edge cases
+          PR_BODY_TRIMMED=$(echo "$PR_BODY" | tr -d '\n' | xargs)
+      
+          # Debugging: Print the raw and trimmed PR body
           echo "Raw PR Body: '$PR_BODY'"
-      
-          # Trim leading/trailing spaces from PR body
-          PR_BODY_TRIMMED=$(echo "$PR_BODY" | xargs)
-      
-          # Debugging: Print the trimmed PR body
           echo "Trimmed PR Body: '$PR_BODY_TRIMMED'"
       
           # Check if the PR description is empty or null
@@ -38,9 +36,10 @@ jobs:
           fi
       
           echo "PR description is sufficient."
-          env:
-            PR_DRAFT: ${{ github.event.pull_request.draft }}
-            PR_BODY: ${{ github.event.pull_request.body }}
+        env:
+          PR_DRAFT: ${{ github.event.pull_request.draft }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+
 
 
       
