@@ -22,8 +22,14 @@ jobs:
             exit 0
           fi
       
+          # Debugging: Print the raw PR body
+          echo "Raw PR Body: '$PR_BODY'"
+      
           # Trim leading/trailing spaces from PR body
           PR_BODY_TRIMMED=$(echo "$PR_BODY" | xargs)
+      
+          # Debugging: Print the trimmed PR body
+          echo "Trimmed PR Body: '$PR_BODY_TRIMMED'"
       
           # Check if the PR description is empty or null
           if [ -z "$PR_BODY_TRIMMED" ]; then
@@ -35,5 +41,6 @@ jobs:
           env:
             PR_DRAFT: ${{ github.event.pull_request.draft }}
             PR_BODY: ${{ github.event.pull_request.body }}
+
 
       
